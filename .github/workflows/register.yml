@@ -11,6 +11,15 @@ jobs:
   register:
     runs-on: ubuntu-latest
     steps:
+      # --- 新增步骤：随机延迟 (0~600秒/10分钟) ---
+      - name: Random Delay
+        run: |
+          # 生成 0 到 600 之间的随机数
+          DELAY=$((RANDOM % 600))
+          echo "为了模拟真人操作，随机等待 $DELAY 秒..."
+          sleep $DELAY
+
+      # --- 以下为原有步骤，未做修改 ---
       - uses: actions/checkout@v3
 
       - name: Setup Python 3.11
