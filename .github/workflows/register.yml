@@ -1,41 +1,50 @@
 name: Auto Register opendoor.cn
 
 on:
-  workflow_dispatch: # 保留手动触发按钮
+  workflow_dispatch:
   schedule:
-    # 含义：每10分钟运行一次 (例如 12:00, 12:10, 12:20...)
+    # 每 10 分钟运行一次
     - cron: '*/10 * * * *'
 
+# 防止上一次还没跑完，下一次又开始跑
+concurrency:
+  group: auto-register-opendoor
+  cancel-in-progress: false
+
+env:
+  # 提前使用 Node.js 24 运行 JavaScript Actions
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   register:
     runs-on: ubuntu-latest
+
     steps:
-      # --- 新增步骤：随机延迟 (0~600秒/10分钟) ---
       - name: Random Delay
         run: |
-          # 生成 0 到 600 之间的随机数
           DELAY=$((RANDOM % 600))
-          echo "为了模拟真人操作，随机等待 $DELAY 秒..."
+          echo "随机等待 $DELAY 秒..."
           sleep $DELAY
 
-      # --- 以下为原有步骤，未做修改 ---
-      - uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
       - name: Setup Python 3.11
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v6
         with:
           python-version: '3.11'
 
       - name: Install Chrome
         run: |
-          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo apt-key add -
-          echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
+          wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | sudo gpg --dearmor -o /usr/share/keyrings/google-linux-signing-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/google-linux-signing-keyring.gpg] http://dl.google.com/linux/chrome/deb/ stable main" | sudo tee /etc/apt/sources.list.d/google-chrome.list
           sudo apt-get update
           sudo apt-get install -y google-chrome-stable
 
       - name: Install Xvfb
-        run: sudo apt-get install -y xvfb
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
 
       - name: Install Python dependencies
         run: |
@@ -48,9 +57,16 @@ jobs:
         env:
           USE_XVFB: "true"
 
+      - name: Find debug screenshots
+        if: always()
+        run: |
+          echo "查找 PNG 文件："
+          find . -name "*.png" -type f || true
+
       - name: Upload debug screenshot
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: debug-screenshot
-          path: "*.png"
+          path: "**/*.png"
+          if-no-files-found: ignore
