@@ -22,7 +22,7 @@ jobs:
     steps:
       - name: Random Delay
         run: |
-          DELAY=$((RANDOM % 600))
+          DELAY=$((RANDOM % 300))
           echo "随机等待 $DELAY 秒..."
           sleep $DELAY
 
