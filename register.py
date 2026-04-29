@@ -16,7 +16,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 BASE_URL = "https://ai.opendoor.cn"
-AFF_CODE = "GnSy"
+AFF_CODE = "1CyL"
 TARGET_URL = f"{BASE_URL}/register?aff={AFF_CODE}"
 
 # ==========================================
