@@ -3,7 +3,7 @@ on:
   workflow_dispatch:
   schedule:
     # 每 30 分钟运行一次
-    - cron: '*/3000 * * * *'
+    - cron: '*/3000000 * * * *'
 
 # 防止上一次还没跑完，下一次又开始跑
 concurrency:
